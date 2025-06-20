@@ -1,5 +1,11 @@
+use std::{thread::sleep, time::Duration};
+
+use crate::utils;
+
 const VID: u16 = 0x1532;
 const PID: u16 = 0x006c;
+const WAIT_MIN_MICRO: u16 = 31000;
+const WAIT_MAX_MICRO: u16 = 31100;
 
 /* Color-related */
 const COLOR_START_SEQUENCE: [u8; 10] = [
@@ -11,6 +17,7 @@ const COLOR_MID_SEQUENCE: [u8; 4] = [
 const SCROLL_WHEEL_IDENTIFIER: u8 = 0x1;
 const LOGO_IDENTIFIER: u8 = 0x4;
 const RIGHT_IDENTIFIER: u8 = 0x10;
+
 
 fn get_sequence (identifier: u8, color: [u8; 3]) -> Vec<u8> {
   let mut data = Vec::new();
@@ -116,6 +123,10 @@ impl RazerMambaWiredBuilder {
 
     for sequence in self.sequences.as_mut().expect("No sequences defined").into_iter() {
       device.send_feature_report(&sequence).expect("Could not write data");
+
+      let duration = utils::time::rand_u16_range(WAIT_MIN_MICRO, WAIT_MAX_MICRO);
+
+      sleep(Duration::from_micros(duration as u64));
     }
   }
 }
